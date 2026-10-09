@@ -1,0 +1,17 @@
+{
+    "dataset": "CIC-IDS2017",
+    "records": 2522362,
+    "features": 78,
+    "classes": 15,
+    "test_size": 0.2,
+    "best_model": "XGBoost",
+    "best_macro_f1": 0.9212145410075258,
+    "best_accuracy": 0.998882001613565,
+    "models_compared": [
+        "Decision Tree",
+        "Random Forest",
+        "Logistic Regression",
+        "XGBoost",
+        "LightGBM"
+    ]
+}
