@@ -31,3 +31,5 @@ data/
 
 # Optional model used only for model comparison
 models/comparison/random_forest.pkl
+# Generated model-performance cache
+models/cache/

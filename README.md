@@ -1,172 +1,83 @@
-# 🛡️ AI Cyber Threat Detection Platform
+# CyberGuard AI — integration update
 
-An AI-powered network threat detection platform that analyzes network traffic data, identifies potentially malicious activity, and presents security insights through an interactive dashboard.
+This update bundle contains replacement backend and frontend integration files for the existing AI Cyber Threat Detection System. It does **not** contain your trained model files or CIC-IDS2017 dataset; keep those in the project root as described below.
 
-Built using **Python, XGBoost, FastAPI, React, and Explainable AI**, this project demonstrates an end-to-end machine learning workflow for network intrusion detection.
-
-## 🚀 Features
-
-- **AI-Based Threat Detection:** Classifies network traffic as benign or potentially malicious using a trained XGBoost model.
-- **CSV Batch Analysis:** Upload network traffic CSV files and analyze multiple records.
-- **Interactive Security Dashboard:** View threat statistics, attack categories, and severity summaries.
-- **Explainable AI:** Inspect feature contributions to understand why a prediction was made.
-- **Threat History:** Store and review detected threats using SQLite.
-- **Model Evaluation:** Explore the confusion matrix, classification report, and model comparison results.
-- **Dataset Analytics:** Review key patterns and statistics from the network traffic data.
-- **REST API:** Access prediction and analytics functionality through FastAPI.
-
-## 🧰 Tech Stack
-
-| Area | Technologies |
-|---|---|
-| Machine Learning | Python, XGBoost, scikit-learn |
-| Explainable AI | SHAP |
-| Backend | FastAPI, Uvicorn |
-| Frontend | React, Vite, JavaScript |
-| Data Processing | Pandas, NumPy |
-| Visualization | Recharts, Matplotlib |
-| Database | SQLite |
-| Dataset | CIC-IDS2017 |
-
-## 🏗️ Architecture
-
-1. **Input:** Network traffic records are provided as a CSV file.
-2. **Preprocessing:** Data is validated and prepared to match the model's expected features.
-3. **Prediction:** The trained XGBoost model predicts whether records are benign or potentially malicious.
-4. **Risk Analysis:** Predictions are summarized by threat category and severity.
-5. **Explainability:** Feature contributions help users inspect individual predictions.
-6. **Visualization:** The React dashboard presents detection results and model evaluation metrics.
-7. **History:** Threat records are stored locally in SQLite for later review.
-
-## 📂 Project Structure
+## Expected project layout
 
 ```text
 AI-Cyber-Threat-Detection/
 ├── backend/
-│   ├── analytics.py
-│   ├── database.py
 │   ├── main.py
+│   ├── database.py
+│   ├── analytics.py
 │   ├── model_performance.py
-│   └── risk_engine.py
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── package.json
-│   └── vite.config.js
+│   ├── risk_engine.py
+│   └── threat_history.db        # created automatically
 ├── ml/
-│   ├── explain_prediction.py
-│   ├── model_comparison.py
-│   ├── preprocess.py
-│   ├── train_model.py
-│   └── xgboost_predict.py
+│   ├── xgboost_predict.py
+│   └── explain_prediction.py
 ├── models/
-│   ├── cyber_threat_model.pkl
-│   ├── classification_report.json
-│   └── comparison/
-├── .gitattributes
-├── .gitignore
-└── README.md
+│   ├── comparison/
+│   │   ├── xgboost.pkl
+│   │   ├── label_encoder.pkl
+│   │   └── model_comparison.csv
+│   └── classification_report.json (optional)
+├── data/processed_cic_ids2017.csv
+└── frontend/
+    ├── package.json
+    ├── vite.config.js
+    ├── index.html
+    └── src/
 ```
 
-## ⚙️ Getting Started
+The inference API uses the saved XGBoost artifact at `models/comparison/xgboost.pkl` and its matching `label_encoder.pkl`. The other four models are represented in the comparison dashboard using the saved `models/comparison/model_comparison.csv` metrics. This is intentional: the current UI does not claim that all five models are simultaneously running inference.
 
-### Prerequisites
+## Apply the update
 
-- Python 3.10 or a compatible version for the installed dependencies
-- Node.js and npm
-- Git
+1. Back up your current project folder.
+2. Extract this ZIP into a temporary folder.
+3. Copy the included `backend`, `ml`, and `frontend` files into your project, replacing files with the same relative paths. Do not delete `data/` or `models/`.
+4. Ensure the two XGBoost artifacts and processed dataset exist at the paths above. Do not rename or mix artifacts from different training runs.
 
-### 1. Clone the repository
+## Run backend (Windows PowerShell)
 
-```bash
-git clone https://github.com/DURVXSH/AI-Cyber-Threat-Detection.git
-cd AI-Cyber-Threat-Detection
-```
-
-Because the trained model is stored with Git LFS, install Git LFS before cloning if necessary. After cloning, verify that `models/cyber_threat_model.pkl` is the actual model file and not an LFS pointer.
-
-### 2. Set up the Python environment
-
-```bash
-python -m venv venv
-```
-
-Activate it on Windows PowerShell:
+From the project root:
 
 ```powershell
-.\venv\Scripts\Activate.ps1
-```
-
-Install the Python dependencies:
-
-```bash
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-### 3. Start the backend
+If your existing `requirements.txt` is already installed, you do not need to recreate the environment. Open `http://127.0.0.1:8000/health` and `http://127.0.0.1:8000/docs`. A degraded health status means the API started but cannot load the expected model artifacts.
 
-From the project root, run:
+## Run frontend
 
-```bash
-python -m uvicorn backend.main:app --reload --port 8000
-```
+Open another PowerShell terminal:
 
-The API should be available at:
-
-- API: http://127.0.0.1:8000
-- Interactive API documentation: http://127.0.0.1:8000/docs
-
-### 4. Start the frontend
-
-Open a second terminal:
-
-```bash
+```powershell
 cd frontend
 npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite, usually http://localhost:5173.
+Open the URL printed by Vite (normally `http://127.0.0.1:5173`). The backend allows that origin by default. If the frontend is served from a different origin, update the CORS allow-list in `backend/main.py`.
 
-## 📊 Model Evaluation
+## Functional checks
 
-The project includes a classification report, confusion matrix, and model comparison artifacts generated during model evaluation.
+- Overview: dataset stats and persisted detection history load from the API.
+- Threat Detection: upload a CSV with all model input feature columns; the `Label` column is optional and ignored.
+- Threat History: inspect records or clear history.
+- Model Intelligence: reads the five-model comparison CSV.
+- Explainability: explains the first row of a compatible CSV. SHAP availability depends on the installed SHAP/XGBoost versions; prediction still works if SHAP raises an error.
+- Confusion Matrix: computes a reproducible holdout evaluation using a reservoir sample of up to 50,000 rows across the processed dataset to bound memory use. The response explains this sampling approach.
 
-Evaluation results depend on the dataset, preprocessing, and test split. Consult the included report files for the actual measured metrics.
+## Important caveats
 
-## 🔍 Explainable AI
-
-The explainability feature helps investigate which input features contributed to a prediction. This supports model interpretation and debugging; it does not guarantee that a prediction is correct or establish the cause of an attack.
-
-## 📁 Dataset
-
-The model was developed using the **CIC-IDS2017** network intrusion detection dataset.
-
-The raw and processed dataset files are not included in this repository because of their size. Obtain the dataset from its official source and follow its usage terms if you want to reproduce the preprocessing or training workflow.
-
-## ⚠️ Limitations
-
-- Predictions depend on the quality and compatibility of the input data.
-- Performance on CIC-IDS2017 does not guarantee performance on live or unseen network traffic.
-- This is a portfolio and learning project, not a substitute for a production-grade security monitoring system.
-- Model outputs should be validated before being used to make operational security decisions.
-
-## 🔮 Future Improvements
-
-- Real-time network traffic ingestion
-- Model monitoring and drift detection
-- Authentication and role-based access control
-- Automated deployment with Docker
-- Expanded testing and security hardening
-
-## 👨‍💻 Author
-
-**Durvesh Shelar**
-
-- GitHub: [@DURVXSH](https://github.com/DURVXSH)
-
----
-
-If you find this project useful, feel free to explore the code and share feedback.
+- Model benchmark metrics are historical values from the saved CSV; they are not recalculated when the page loads.
+- Dataset analytics describe CIC-IDS2017, not live network traffic. Live capture/packet inspection is not included.
+- Risk scores and severity labels are application rules, not model probabilities.
+- A model artifact trained with a different feature order/schema must not be used with this API. If `feature_names_in_` is absent, the loader infers order from the processed dataset header and checks the expected feature count.
+- The confusion matrix is a diagnostic sample and may differ from metrics generated by the original training run.
+- Do not expose this development API directly to the public internet without authentication, request limits, upload controls, and deployment hardening.

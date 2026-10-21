@@ -1,251 +1,38 @@
-import { useState } from "react";
-
-import Dashboard from "./components/Dashboard";
-import ThreatDetection from "./components/ThreatDetection";
-import ThreatHistory from "./components/ThreatHistory";
-import Explainability from "./components/Explainability";
-import ModelPerformance from "./components/ModelPerformance";
-import ConfusionMatrix from "./components/ConfusionMatrix";
-
-
-function App() {
-
-  const [activePage, setActivePage] = useState("dashboard");
-
-
-  const navigation = [
-    {
-      id: "dashboard",
-      name: "Dashboard",
-      icon: "▣"
-    },
-    {
-      id: "detection",
-      name: "Threat Detection",
-      icon: "◉"
-    },
-    {
-      id: "history",
-      name: "Threat History",
-      icon: "☷"
-    },
-    {
-     id: "explainability",
-     name: "Explainable AI",
-    icon: "✳"
-    },
-    {
-      id: "performance",
-      name: "Model Performance",
-      icon: "▥"
-    },
-    { id: "confusion", name: "Confusion Matrix", icon: "▦" },
-  ];
-
-
-  const renderPage = () => {
-
-    if (activePage === "dashboard") {
-      return <Dashboard />;
-    }
-
-    if (activePage === "detection") {
-      return <ThreatDetection />;
-    }
-
-    if (activePage === "history") {
-      return <ThreatHistory />;
-    }
-    if (activePage === "explainability") {
-      return <Explainability />;
-    }
-    if (activePage === "performance") {
-     return <ModelPerformance />;
-    }
-   if (activePage === "confusion") {
-      return <ConfusionMatrix />;
-    }
-    return <Dashboard />;
-  };
-
-
-  return (
-
-    <div className="min-h-screen bg-slate-950 text-white flex">
-
-
-      {/* ========================================= */}
-      {/* SIDEBAR */}
-      {/* ========================================= */}
-
-      <aside className="w-64 min-h-screen bg-slate-900 border-r border-slate-800 flex flex-col">
-
-
-        {/* LOGO */}
-
-        <div className="px-6 py-6 border-b border-slate-800">
-
-          <div className="flex items-center gap-3">
-
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl">
-
-              🛡️
-
-            </div>
-
-
-            <div>
-
-              <h1 className="font-bold text-sm">
-                AI Cyber
-              </h1>
-
-              <p className="text-xs text-slate-400">
-                Threat Detection
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        {/* NAVIGATION */}
-
-        <nav className="flex-1 px-3 py-6">
-
-          <p className="px-3 mb-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-
-            Monitoring
-
-          </p>
-
-
-          <div className="space-y-2">
-
-            {navigation.map((item) => (
-
-              <button
-                key={item.id}
-                onClick={() => setActivePage(item.id)}
-                className={`
-                  w-full flex items-center gap-3
-                  px-4 py-3 rounded-lg
-                  text-sm font-medium
-                  transition-all duration-200
-                  text-left
-                  ${
-                    activePage === item.id
-                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                      : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                  }
-                `}
-              >
-
-                <span className="text-lg w-5 text-center">
-                  {item.icon}
-                </span>
-
-                <span>
-                  {item.name}
-                </span>
-
-              </button>
-
-            ))}
-
-          </div>
-
-        </nav>
-
-
-        {/* MODEL STATUS */}
-
-        <div className="p-4">
-
-          <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-4">
-
-            <div className="flex items-center gap-2 mb-2">
-
-              <span className="relative flex h-2.5 w-2.5">
-
-                <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping"></span>
-
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-
-              </span>
-
-              <span className="text-xs font-medium text-green-400">
-                AI Engine Online
-              </span>
-
-            </div>
-
-
-            <p className="text-xs text-slate-500">
-              XGBoost • CIC-IDS2017
-            </p>
-
-          </div>
-
-        </div>
-
-
-      </aside>
-
-
-      {/* ========================================= */}
-      {/* MAIN CONTENT */}
-      {/* ========================================= */}
-
-      <main className="flex-1 min-w-0">
-
-        {/* TOP BAR */}
-
-        <header className="h-16 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between px-6">
-
-          <div>
-
-            <p className="text-sm text-slate-400">
-
-              Security Operations Center
-
-            </p>
-
-          </div>
-
-
-          <div className="flex items-center gap-3">
-
-            <div className="w-2 h-2 rounded-full bg-green-500"></div>
-
-            <span className="text-sm text-slate-400">
-              API Online
-            </span>
-
-          </div>
-
-        </header>
-
-
-        {/* PAGE */}
-
-        <div className="min-h-[calc(100vh-4rem)]">
-
-          {renderPage()}
-
-        </div>
-
-
-      </main>
-
-
-    </div>
-
-  );
-
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+
+const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
+const NAV = [{id:'overview',label:'Overview',icon:'◫'},{id:'detect',label:'Threat Detection',icon:'⌁'},{id:'history',label:'Threat History',icon:'◷'},{id:'models',label:'Model Intelligence',icon:'▥'},{id:'explain',label:'Explainability',icon:'⌘'},{id:'matrix',label:'Confusion Matrix',icon:'▦'}]
+const SEVERITY_COLORS = {CRITICAL:'#ff4d6d',HIGH:'#ff9f43',MEDIUM:'#f7d154',LOW:'#2dd4bf'}
+async function api(path, options={}) { const response=await fetch(`${API}${path}`,options); let data; try{data=await response.json()}catch{throw new Error(`Server returned an unreadable response (${response.status})`)} if(!response.ok) throw new Error(data.detail?.message || data.detail || data.error || `Request failed (${response.status})`); return data }
+function fmt(n){return Number(n||0).toLocaleString()}
+function pct(n){return `${Number(n||0).toFixed(2)}%`}
+function Panel({title,subtitle,action,children,className=''}){return <section className={`panel ${className}`}><div className="panel-head"><div><h3>{title}</h3>{subtitle&&<p>{subtitle}</p>}</div>{action}</div>{children}</section>}
+function Stat({label,value,sub,icon,tone='cyan'}){return <div className={`stat-card tone-${tone}`}><div className="stat-top"><span>{label}</span><span className="stat-icon">{icon}</span></div><strong>{value}</strong><small>{sub}</small><div className="stat-line"/></div>}
+function Badge({value}){return <span className={`badge badge-${String(value||'low').toLowerCase()}`}>{value||'UNKNOWN'}</span>}
+function Empty({children='No data available yet.'}){return <div className="empty"><span>⌁</span><p>{children}</p></div>}
+function App(){
+ const [page,setPage]=useState('overview'),[health,setHealth]=useState(null),[analytics,setAnalytics]=useState(null),[performance,setPerformance]=useState(null),[security,setSecurity]=useState(null),[history,setHistory]=useState({history:[],statistics:{}}),[comparison,setComparison]=useState({models:[]}),[matrix,setMatrix]=useState(null),[loading,setLoading]=useState(false),[notice,setNotice]=useState(''),[error,setError]=useState(''),[mobileNav,setMobileNav]=useState(false)
+ const refresh=useCallback(async()=>{try{const [h,a,p,s,hi,co]=await Promise.all([api('/health'),api('/analytics'),api('/model-performance'),api('/security-summary'),api('/threat-history'),api('/model-comparison')]);setHealth(h);setAnalytics(a);setPerformance(p);setSecurity(s);setHistory(hi);setComparison(co)}catch(e){setError(e.message)}},[])
+ useEffect(()=>{refresh();const timer=setInterval(refresh,60000);return()=>clearInterval(timer)},[refresh])
+ useEffect(()=>{if(page==='matrix'&&!matrix){setLoading(true);api('/confusion-matrix').then(setMatrix).catch(e=>setError(e.message)).finally(()=>setLoading(false))}},[page,matrix])
+ const showNotice=(message)=>{setNotice(message);setError('');setTimeout(()=>setNotice(''),5000)}
+ const threatDistribution=useMemo(()=>{const source=analytics?.attack_types||{};return Object.entries(source).sort((a,b)=>b[1]-a[1]).slice(0,7).map(([name,value])=>({name:name.length>22?name.slice(0,20)+'…':name,value}))},[analytics])
+ const go=(id)=>{setPage(id);setMobileNav(false);setError('')}
+ return <div className="app-shell"><aside className={`sidebar ${mobileNav?'sidebar-open':''}`}><div className="brand"><div className="brand-mark"><span>⌁</span><i/></div><div><b>CYBERGUARD<span> AI</span></b><small>THREAT INTELLIGENCE</small></div></div><div className="environment"><span className={`pulse ${health?.model_available?'':'pulse-off'}`}/><div><b>{health?.model_available?'ENGINE ONLINE':'ENGINE CHECK'}</b><small>{health?.model_available?'XGBOOST INFERENCE':'MODEL STATUS'}</small></div><span className="env-dot">●</span></div><div className="nav-label">SECURITY CONSOLE</div><nav>{NAV.map(n=><button key={n.id} onClick={()=>go(n.id)} className={`nav-item ${page===n.id?'active':''}`}><span className="nav-icon">{n.icon}</span><span>{n.label}</span>{n.id==='history'&&history.statistics?.threats>0&&<em>{history.statistics.threats}</em>}</button>)}</nav><div className="sidebar-bottom"><div className="shield-art"><div className="shield">⬡</div><div><b>DEFENSE STATUS</b><small>{security?.security_status||'AWAITING DATA'}</small></div></div><small className="version">CYBERGUARD CONSOLE · v2.0</small></div></aside>
+ <main className="main-area"><header className="topbar"><div className="topbar-left"><button className="mobile-menu" onClick={()=>setMobileNav(!mobileNav)}>☰</button><div><div className="eyebrow">SECURITY OPERATIONS CENTER <span> / </span> {NAV.find(n=>n.id===page)?.label.toUpperCase()}</div><h1>{NAV.find(n=>n.id===page)?.label}</h1></div></div><div className="topbar-right"><div className="live-indicator"><span className="pulse"/> SYSTEM {health?.model_available?'OPERATIONAL':'DEGRADED'}</div><button className="icon-button" title="Refresh dashboard" onClick={refresh}>↻</button><div className="avatar">DG</div></div></header>
+ <div className="content">{notice&&<div className="notice success">✓ {notice}</div>}{error&&<div className="notice danger">⚠ {error}<button onClick={()=>setError('')}>×</button></div>}
+ {page==='overview'&&<><div className="welcome-row"><div><div className="section-kicker">THREAT LANDSCAPE <span>● LIVE API STATUS</span></div><h2>Security at a glance.</h2><p>Monitor classified network activity, model health, and detected threats from one console.</p></div><div className="dataset-chip"><span className="dataset-icon">▤</span><div><b>CIC-IDS2017</b><small>REFERENCE DATASET</small></div></div></div><div className="stat-grid"><Stat label="Dataset Events" value={fmt(analytics?.total_events)} sub="Processed reference flows" icon="▦" tone="cyan"/><Stat label="Threat Events" value={fmt(analytics?.threat_events)} sub={`${pct(analytics?.threat_percentage)} of dataset`} icon="⌁" tone="red"/><Stat label="Threats in History" value={fmt(history.statistics?.threats)} sub={`${fmt(history.statistics?.total)} saved detections`} icon="◷" tone="orange"/><Stat label="XGBoost Accuracy" value={performance?.accuracy==null?'—':pct(performance.accuracy)} sub="Saved evaluation benchmark" icon="◎" tone="green"/></div><div className="dashboard-grid"><Panel title="Attack distribution" subtitle="Most common attack labels in the reference dataset"><div className="chart-box">{threatDistribution.length?<ResponsiveContainer width="100%" height="260"><BarChart data={threatDistribution} layout="vertical" margin={{left:10,right:16,top:6,bottom:0}}><CartesianGrid strokeDasharray="3 3" stroke="#1c3043" horizontal={false}/><XAxis type="number" stroke="#71869c" tick={{fontSize:11}}/><YAxis type="category" dataKey="name" width={135} stroke="#9aadc0" tick={{fontSize:11}}/><Tooltip contentStyle={{background:'#0b1928',border:'1px solid #254057',borderRadius:10}}/><Bar dataKey="value" radius={[0,5,5,0]} fill="#17c6b1"/></BarChart></ResponsiveContainer>:<Empty>Dataset statistics are not available.</Empty>}</div></Panel><Panel title="Security posture" subtitle="Dataset label distribution"><div className="posture-wrap"><div className="donut"><ResponsiveContainer width="100%" height="190"><PieChart><Pie data={[{name:'Benign',value:analytics?.benign_events||0},{name:'Threat',value:analytics?.threat_events||0}]} dataKey="value" innerRadius={57} outerRadius={78} paddingAngle={4} stroke="none">{['#20d6b2','#ff5470'].map((c,i)=><Cell key={c} fill={c}/>)}</Pie><Tooltip contentStyle={{background:'#0b1928',border:'1px solid #254057',borderRadius:8}}/></PieChart></ResponsiveContainer><div className="donut-center"><b>{pct(analytics?.threat_percentage)}</b><small>THREAT RATE</small></div></div><div className="legend-list"><div><i className="legend-dot green"/><span>Benign traffic</span><b>{fmt(analytics?.benign_events)}</b></div><div><i className="legend-dot red"/><span>Threat traffic</span><b>{fmt(analytics?.threat_events)}</b></div><div className="posture-status"><span className={`status-mark status-${(security?.security_status||'low').toLowerCase()}`}/><div><small>DATASET POSTURE</small><b>{security?.security_status||'UNKNOWN'}</b></div></div></div></div><p className="footnote">Reference dataset summary — not a live network sensor.</p></Panel><Panel title="Recent detections" subtitle="Latest entries recorded by the detection engine" action={<button className="text-button" onClick={()=>go('history')}>View history ↗</button>} className="wide-panel"><div className="table-wrap"><table><thead><tr><th>CLASSIFICATION</th><th>CONFIDENCE</th><th>RISK</th><th>SEVERITY</th><th>SOURCE</th></tr></thead><tbody>{(history.history||[]).slice(0,5).map(r=><tr key={r.id}><td><span className={r.prediction==='BENIGN'?'benign-label':'attack-label'}>{r.prediction}</span></td><td>{pct(Number(r.confidence||0)*100)}</td><td><div className="risk-inline"><div className="mini-track"><i style={{width:`${r.risk_score}%`,background:SEVERITY_COLORS[r.severity]||'#2dd4bf'}}/></div><b>{r.risk_score}</b></div></td><td><Badge value={r.severity}/></td><td className="muted-cell">{r.source}</td></tr>)}</tbody></table>{!history.history?.length&&<Empty>No detections have been saved yet. Upload a CSV to begin.</Empty>}</div></Panel></div></>}
+ {page==='detect'&&<Detection onDone={async data=>{showNotice(`Analysis complete: ${fmt(data.threat_records)} threats detected across ${fmt(data.total_records)} rows.`);await refresh()}} onError={setError}/>}
+ {page==='history'&&<History data={history} refresh={refresh} onNotice={showNotice} onError={setError}/>}
+ {page==='models'&&<Models data={comparison} performance={performance} onError={setError}/>}
+ {page==='explain'&&<Explain onNotice={showNotice} onError={setError}/>}
+ {page==='matrix'&&<Matrix data={matrix} loading={loading} onRetry={()=>{setMatrix(null);setError('')}}/>}
+ <footer className="footer"><span><i/> CYBERGUARD AI <span className="footer-sep">·</span> ML-POWERED THREAT TRIAGE</span><span>API <b>{health?.model_available?'CONNECTED':'DEGRADED'}</b><span className="footer-sep">·</span> DATASET: CIC-IDS2017</span></footer></div></main>{mobileNav&&<button className="mobile-overlay" onClick={()=>setMobileNav(false)} aria-label="Close navigation"/>}</div>
 }
-
-
-export default App;
+function Detection({onDone,onError}){const [file,setFile]=useState(null),[busy,setBusy]=useState(false),[result,setResult]=useState(null);async function submit(e){e.preventDefault();if(!file){onError('Choose a CSV file first.');return}setBusy(true);setResult(null);onError('');try{const form=new FormData();form.append('file',file);const data=await api('/predict-csv',{method:'POST',body:form});setResult(data);onDone(data)}catch(err){onError(err.message)}finally{setBusy(false)}}return <><div className="welcome-row"><div><div className="section-kicker">INFERENCE WORKSPACE</div><h2>Inspect network flows.</h2><p>Upload a CSV containing the same numeric features used to train the XGBoost model.</p></div><div className="dataset-chip"><span className="dataset-icon">⌁</span><div><b>Batch inference</b><small>UP TO 100 MB PER FILE</small></div></div></div><div className="detect-layout"><Panel title="Upload traffic dataset" subtitle="CSV only · CIC-IDS2017 feature schema"><form onSubmit={submit}><label className={`dropzone ${file?'file-selected':''}`}><input type="file" accept=".csv,text/csv" onChange={e=>{setFile(e.target.files?.[0]||null);setResult(null)}}/><span className="upload-symbol">⇧</span><b>{file?file.name:'Drop your CSV here'}</b><small>{file?`${(file.size/1024/1024).toFixed(2)} MB · ready to analyze`:'or click to browse local files'}</small><span className="file-format">.CSV FORMAT</span></label><div className="schema-note"><span>ⓘ</span><p>Required feature names and column order must match the saved model schema. The optional <code>Label</code> column is ignored during prediction.</p></div><button className="primary-button full-button" disabled={busy||!file}>{busy?<><span className="spinner"/> Analyzing traffic…</>:'⌁  Analyze network traffic'}</button></form></Panel><Panel title="Analysis workflow" subtitle="What happens after upload"><div className="workflow">{[['01','Schema validation','Verify required model features are present.'],['02','XGBoost inference','Classify each row and estimate confidence.'],['03','Risk enrichment','Apply the configurable risk and severity rules.'],['04','History persistence','Store results for review in Threat History.']].map(x=><div className="workflow-item" key={x[0]}><span>{x[0]}</span><div><b>{x[1]}</b><small>{x[2]}</small></div></div>)}</div><div className="disclaimer">Risk scores are rule-based triage indicators, not probabilities of compromise.</div></Panel></div>{result&&<><div className="stat-grid result-stats"><Stat label="Rows analyzed" value={fmt(result.total_records)} sub={result.filename} icon="▦"/><Stat label="Threats detected" value={fmt(result.threat_records)} sub={`${pct(result.threat_percentage)} of upload`} icon="⌁" tone="red"/><Stat label="Benign rows" value={fmt(result.benign_records)} sub="Classified as BENIGN" icon="✓" tone="green"/><Stat label="Attack classes" value={fmt(Object.keys(result.attack_types||{}).length)} sub="Distinct non-benign labels" icon="◈" tone="orange"/></div><Panel title="Prediction preview" subtitle="First 100 rows returned by the API"><div className="table-wrap"><table><thead><tr><th>ROW</th><th>PREDICTION</th><th>CONFIDENCE</th><th>RISK SCORE</th><th>SEVERITY</th></tr></thead><tbody>{(result.results_preview||[]).map((r,i)=><tr key={i}><td className="muted-cell">{i+1}</td><td>{r.Prediction}</td><td>{pct(r.Confidence*100)}</td><td>{r['Risk Score']}/100</td><td><Badge value={r.Severity}/></td></tr>)}</tbody></table></div></Panel></>}</>}
+function History({data,refresh,onNotice,onError}){const [busy,setBusy]=useState(false);async function clear(){if(!window.confirm('Clear all saved threat history? This cannot be undone.'))return;setBusy(true);try{await api('/threat-history',{method:'DELETE'});await refresh();onNotice('Threat history cleared.')}catch(e){onError(e.message)}finally{setBusy(false)}}return <><div className="welcome-row"><div><div className="section-kicker">DETECTION AUDIT TRAIL</div><h2>Threat history.</h2><p>Review stored predictions and risk classifications from single and batch inference.</p></div><button className="danger-button" onClick={clear} disabled={busy||!data.history?.length}>{busy?'Clearing…':'⌫ Clear history'}</button></div><div className="stat-grid"><Stat label="Total saved" value={fmt(data.statistics?.total)} sub="Persisted predictions" icon="◷"/><Stat label="Threats" value={fmt(data.statistics?.threats)} sub="Non-benign classifications" icon="⌁" tone="red"/><Stat label="Benign" value={fmt(data.statistics?.benign)} sub="Normal traffic predictions" icon="✓" tone="green"/><Stat label="Critical" value={fmt(data.statistics?.critical)} sub="Critical severity records" icon="⚠" tone="orange"/></div><Panel title="Detection records" subtitle={`Showing ${fmt(data.history?.length)} most recent records`} action={<button className="secondary-button" onClick={refresh}>↻ Refresh</button>}><div className="table-wrap"><table><thead><tr><th>TIME</th><th>PREDICTION</th><th>CONFIDENCE</th><th>RISK</th><th>SEVERITY</th><th>SOURCE</th></tr></thead><tbody>{(data.history||[]).map(r=><tr key={r.id}><td className="time-cell">{r.timestamp?.replace('T',' ').slice(0,19)||'—'}</td><td>{r.prediction}</td><td>{pct(Number(r.confidence||0)*100)}</td><td><b>{r.risk_score}/100</b></td><td><Badge value={r.severity}/></td><td className="muted-cell">{r.source}</td></tr>)}</tbody></table>{!data.history?.length&&<Empty>No history records yet. Run a single prediction or upload a CSV.</Empty>}</div></Panel></>}
+function Models({data,performance}){const models=data.models||[];return <><div className="welcome-row"><div><div className="section-kicker">MODEL BENCHMARKING</div><h2>Model intelligence.</h2><p>Compare the five trained classifiers using the metrics persisted during model training.</p></div><div className="dataset-chip"><span className="dataset-icon">◎</span><div><b>{models.length||0} models</b><small>SAVED BENCHMARKS</small></div></div></div>{!data.success&&<div className="notice danger">{data.error||'Model comparison data unavailable. Run the training/comparison script first.'}</div>}<div className="stat-grid"><Stat label="Best macro F1" value={data.best_model?pct(data.best_model.macro_f1):'—'} sub={data.best_model?.model||'No benchmark'} icon="✦" tone="green"/><Stat label="XGBoost accuracy" value={performance?.accuracy==null?'—':pct(performance.accuracy)} sub="Selected inference model" icon="◎"/><Stat label="Classifiers trained" value={fmt(models.length)} sub="Loaded comparison records" icon="▥" tone="cyan"/><Stat label="Top model" value={data.best_model?.model||'—'} sub="Ranked by macro F1" icon="⌁" tone="orange"/></div><div className="dashboard-grid"><Panel title="Accuracy comparison" subtitle="Saved test-set accuracy (%)"><div className="chart-box">{models.length?<ResponsiveContainer width="100%" height={290}><BarChart data={models} margin={{left:0,right:12,top:10,bottom:12}}><CartesianGrid strokeDasharray="3 3" stroke="#1c3043"/><XAxis dataKey="model" stroke="#9aadc0" tick={{fontSize:11}}/><YAxis domain={[0,100]} stroke="#71869c" tick={{fontSize:11}}/><Tooltip contentStyle={{background:'#0b1928',border:'1px solid #254057',borderRadius:10}}/><Bar dataKey="accuracy" name="Accuracy %" fill="#17c6b1" radius={[5,5,0,0]}/></BarChart></ResponsiveContainer>:<Empty/>}</div></Panel><Panel title="Macro F1 comparison" subtitle="Balanced class-level performance"><div className="chart-box">{models.length?<ResponsiveContainer width="100%" height={290}><BarChart data={models} margin={{left:0,right:12,top:10,bottom:12}}><CartesianGrid strokeDasharray="3 3" stroke="#1c3043"/><XAxis dataKey="model" stroke="#9aadc0" tick={{fontSize:11}}/><YAxis domain={[0,100]} stroke="#71869c" tick={{fontSize:11}}/><Tooltip contentStyle={{background:'#0b1928',border:'1px solid #254057',borderRadius:10}}/><Bar dataKey="macro_f1" name="Macro F1 %" fill="#7c8cff" radius={[5,5,0,0]}/></BarChart></ResponsiveContainer>:<Empty/>}</div></Panel><Panel title="Benchmark table" subtitle="Metrics reported by the training pipeline" className="wide-panel"><div className="table-wrap"><table><thead><tr><th>MODEL</th><th>ACCURACY</th><th>MACRO PRECISION</th><th>MACRO RECALL</th><th>MACRO F1</th><th>WEIGHTED F1</th><th>TRAIN TIME</th></tr></thead><tbody>{models.map(m=><tr key={m.model}><td><b>{m.model}</b>{m.model===data.best_model?.model&&<span className="best-tag">BEST</span>}</td><td>{pct(m.accuracy)}</td><td>{pct(m.macro_precision)}</td><td>{pct(m.macro_recall)}</td><td>{pct(m.macro_f1)}</td><td>{pct(m.weighted_f1)}</td><td>{m.training_time_seconds==null?'—':`${m.training_time_seconds}s`}</td></tr>)}</tbody></table>{!models.length&&<Empty/>}</div>{data.metric_note&&<p className="footnote">{data.metric_note}</p>}</Panel></div></>}
+function Explain({onNotice,onError}){const [file,setFile]=useState(null),[busy,setBusy]=useState(false),[data,setData]=useState(null);async function submit(e){e.preventDefault();if(!file){onError('Choose a CSV file first.');return}setBusy(true);setData(null);try{const form=new FormData();form.append('file',file);const result=await api('/explain-csv',{method:'POST',body:form});setData(result);onNotice('Prediction and explanation generated for the first row.')}catch(e){onError(e.message)}finally{setBusy(false)}}return <><div className="welcome-row"><div><div className="section-kicker">EXPLAINABLE AI · SHAP</div><h2>Understand the prediction.</h2><p>Inspect the strongest feature contributions for a sample row using SHAP when supported by the loaded model.</p></div></div><div className="detect-layout"><Panel title="Explain a sample" subtitle="Upload a compatible CSV; the first row is explained"><form onSubmit={submit}><label className={`dropzone ${file?'file-selected':''}`}><input type="file" accept=".csv,text/csv" onChange={e=>{setFile(e.target.files?.[0]||null);setData(null)}}/><span className="upload-symbol">⌘</span><b>{file?file.name:'Choose a CSV file'}</b><small>{file?'Ready to generate an explanation':'First data row is used for SHAP analysis'}</small></label><button className="primary-button full-button" disabled={busy||!file}>{busy?<><span className="spinner"/> Explaining…</>:'⌘  Generate explanation'}</button></form></Panel><Panel title="How to read SHAP" subtitle="Model transparency, not causality"><div className="workflow"><div className="workflow-item"><span className="impact-positive">+</span><div><b>Positive contribution</b><small>Pushes the model output toward a class for the explained prediction.</small></div></div><div className="workflow-item"><span className="impact-negative">−</span><div><b>Negative contribution</b><small>Pushes the model output away from that class.</small></div></div><div className="workflow-item"><span>i</span><div><b>Feature attribution</b><small>Explains model behavior for this sample; it does not establish cause.</small></div></div></div></Panel></div>{data&&<Panel title="Explanation result" subtitle={`Sample prediction: ${data.prediction}`}><div className="explanation-summary"><div><small>PREDICTED CLASS</small><b>{data.prediction}</b></div><div><small>CONFIDENCE</small><b>{pct(data.confidence*100)}</b></div></div><div className="feature-list">{(data.top_features||[]).map((f,i)=><div className="feature-row" key={f.feature}><div className="feature-name"><span>{String(i+1).padStart(2,'0')}</span><b>{f.feature}</b><small>value {Number(f.feature_value).toPrecision(5)}</small></div><div className="feature-bar-wrap"><div className={`feature-bar ${f.shap_value>=0?'positive':'negative'}`} style={{width:`${Math.max(2,Math.abs(f.shap_value)/(Math.max(0.000001,...(data.top_features||[]).map(x=>Math.abs(x.shap_value))))*100)}%`}}/></div><b className={f.shap_value>=0?'value-positive':'value-negative'}>{f.shap_value>=0?'+':''}{Number(f.shap_value).toFixed(5)}</b></div>)}{!data.top_features?.length&&<Empty>SHAP values are unavailable in this runtime. Prediction is still valid.</Empty>}</div><p className="footnote">{data.explanation_note}</p></Panel>}</>}
+function Matrix({data,loading,onRetry}){if(loading)return <div className="panel loading-panel"><span className="spinner"/> Preparing confusion matrix…</div>;if(!data?.success)return <><div className="welcome-row"><div><div className="section-kicker">CLASSIFICATION DIAGNOSTICS</div><h2>Confusion matrix.</h2><p>Compare predicted labels against the dataset labels on a reproducible holdout sample.</p></div><button className="secondary-button" onClick={onRetry}>↻ Retry</button></div><div className="panel"><Empty>{data?.error||'Confusion matrix could not be loaded. Confirm the dataset and model artifacts exist.'}</Empty></div></> ;const labels=data.class_labels||data.labels||[],matrix=data.matrix||data.confusion_matrix||[];return <><div className="welcome-row"><div><div className="section-kicker">CLASSIFICATION DIAGNOSTICS</div><h2>Confusion matrix.</h2><p>Rows represent actual labels; columns represent predicted labels.</p></div><div className="dataset-chip"><span className="dataset-icon">▦</span><div><b>{fmt(data.test_samples)} samples</b><small>{data.model||'XGBOOST'} HOLDOUT</small></div></div></div><div className="stat-grid"><Stat label="Accuracy" value={pct(data.accuracy_percent)} sub="On evaluation sample" icon="◎" tone="green"/><Stat label="Correct predictions" value={fmt(data.correct_predictions)} sub="Diagonal cells summed" icon="✓"/><Stat label="Incorrect predictions" value={fmt(data.incorrect_predictions)} sub="Off-diagonal cells summed" icon="⚠" tone="red"/><Stat label="Classes" value={fmt(labels.length)} sub="Labels represented in matrix" icon="▦" tone="cyan"/></div><Panel title="Actual vs predicted" subtitle="Cell intensity reflects count relative to the matrix maximum"><div className="matrix-outer"><div className="matrix-grid" style={{'--n':labels.length}}><div className="matrix-corner">ACTUAL ↓<br/>PREDICTED →</div>{labels.map(l=><div className="matrix-label top-label" key={`top-${l}`} title={l}>{l}</div>)}{matrix.map((row,i)=><><div className="matrix-label row-label" key={`row-${labels[i]}`} title={labels[i]}>{labels[i]}</div>{row.map((v,j)=>{const max=Math.max(1,...matrix.flat());const alpha=Math.min(.9,.08+Number(v)/max*.82);return <div key={`${i}-${j}`} className={`matrix-cell ${i===j?'diagonal':''}`} title={`Actual: ${labels[i]} | Predicted: ${labels[j]} | Count: ${v}`} style={{background:i===j?`rgba(32,214,178,${alpha})`:`rgba(255,84,112,${alpha*.8})`}}>{fmt(v)}</div>})}</>)}</div></div><p className="footnote">{data.note}</p></Panel></>}
+export default App
